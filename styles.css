@@ -1,0 +1,91 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 20px;
+    color: #fff;
+    background-image: url('https://cdn.discordapp.com/attachments/1279830051118121052/1300785129198718996/fanny-the-aspirants-mobile-legends-4k-wallpaper-uhdpaper.com-501f.jpg?ex=67221a0e&is=6720c88e&hm=d909f066d960f3e15da13b6c20239dafcb9baebd9a9ade85ef236dd204dac793');
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+}
+.container {
+    max-width: 600px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+h1 {
+    color: #ffd700;
+    margin-bottom: 20px;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+form {
+    display: flex;
+    flex-direction: column;
+}
+input {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+}
+button {
+    padding: 10px;
+    border: none;
+    background: linear-gradient(90deg, #ff8c00, #ffd700);
+    color: white;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+button:hover {
+    background: linear-gradient(90deg, #ffd700, #ff8c00);
+    transform: scale(1.05);
+}
+.popup, .input-popup {
+    display: none;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    text-align: center;
+}
+.popup {
+    background-color: rgba(0, 0, 0, 0.9);
+    color: #fff;
+}
+.input-popup {
+    background-color: rgba(26, 25, 25, 0.9);
+}
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: none;
+    z-index: 50;
+}
+.overlay.active, .popup.active, .input-popup.active {
+    display: block;
+}
+.username-display {
+    margin-bottom: 15px;
+    font-weight: bold;
+}

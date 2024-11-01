@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cherry Diamonds MLBB</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #fff;
+            background-image: url('https://cdn.discordapp.com/attachments/1279830051118121052/1300785129198718996/fanny-the-aspirants-mobile-legends-4k-wallpaper-uhdpaper.com-501f.jpg?ex=67221a0e&is=6720c88e&hm=d909f066d960f3e15da13b6c20239dafcb9baebd9a9ade85ef236dd204dac793');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .container {
+            max-width: 600px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        h1 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        input {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+        button {
+            padding: 10px;
+            border: none;
+            background: linear-gradient(90deg, #ff8c00, #ffd700);
+            color: white;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            background: linear-gradient(90deg, #ffd700, #ff8c00);
+            transform: scale(1.05);
+        }
+        .popup, .input-popup {
+            display: none;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            text-align: center;
+        }
+        .popup {
+            background-color: rgba(0, 0, 0, 0.9);
+            color: #fff;
+        }
+        .input-popup {
+            background-color: rgba(26, 25, 25, 0.9);
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            z-index: 50;
+        }
+        .overlay.active, .popup.active, .input-popup.active {
+            display: block;
+        }
+        .username-display {
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>💎 Cherry Diamonds MLBB 💎</h1>
+    <form id="userForm">
+        <input type="text" id="userId" placeholder="Enter User ID" required>
+        <input type="text" id="zoneId" placeholder="Enter Zone ID" required>
+        <button type="submit">Buy now</button>
+    </form>
+    
+    <button class="new-checker-btn" id="newChecker" style="display: none;">Check Another User</button>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="popup" id="popup">
+    <div id="popupMessage"></div>
+    <button id="closePopup">Close</button>
+</div>
+
+<div class="input-popup" id="inputPopup">
+    <h2>Enter Purchase Details</h2>
+    <div class="username-display" id="usernameDisplay"></div>
+    <input type="text" id="diamondsInput" placeholder="💎 Diamonds" required>
+    <input type="text" id="priceInput" placeholder="Price ($)" required readonly>
+    <button id="sendWhatsApp">Send via WhatsApp</button>
+    <button id="closeInputPopup">Close</button>
+</div>
+
+<script>
+    let currentUserId = '';
+    let currentZoneId = '';
+    let currentUsername = '';
+
+    const priceList = {
+        86: 4.00,
+        172: 6.00,
+        257: 8.00,
+        344: 9.00,
+        514: 14.00,
+        600: 15.00,
+        963: 22.00,
+        1412: 30.00,
+        2195: 48.00,
+        3688: 76.00,
+        4394: 91.00,
+        5532: 114.00,
+        6238: 129.00,
+        7727: 154.00,
+        9288: 184.00,
+        12976: 259.00
+    };
+
+    function getPrice(diamonds) {
+        return priceList[diamonds] || null; // Return null if diamonds not found in price list
+    }
+
+    document.getElementById('userForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const userId = encodeURIComponent(document.getElementById('userId').value);
+        const zoneId = encodeURIComponent(document.getElementById('zoneId').value);
+
+        const overlay = document.getElementById('overlay');
+        const popup = document.getElementById('popup');
+        const popupMessage = document.getElementById('popupMessage');
+
+        overlay.classList.remove('active'); // Hide previous overlay
+        popup.classList.remove('active'); // Hide previous popup
+
+        try {
+            const response = await fetch(`http://localhost:3001/getUserInfo?userid=${userId}&zoneid=${zoneId}`);
+            
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            
+            const data = await response.json();
+
+            // Determine message based on response
+            if (!data.error) {
+                if (data.msg === "id_found") {
+                    currentUsername = data.data.username || "No Username Found";
+                    document.getElementById('usernameDisplay').innerText = `Username: ${currentUsername}`;
+                    popupMessage.innerText = `Username: ${currentUsername}`;
+                    document.getElementById('inputPopup').classList.add('active'); // Show input popup
+                } else {
+                    popupMessage.innerText = "Invalid UserID/ServerID";
+                }
+            } else {
+                popupMessage.innerText = "An error occurred. Please try again.";
+            }
+
+            overlay.classList.add('active');
+            popup.classList.add('active');
+
+            // Store current user info for WhatsApp
+            currentUserId = userId;
+            currentZoneId = zoneId;
+
+        } catch (error) {
+            popupMessage.innerText = `Error: ${error.message}`;
+            overlay.classList.add('active');
+            popup.classList.add('active');
+        }
+    });
+
+    document.getElementById('diamondsInput').addEventListener('input', () => {
+        const diamonds = parseInt(document.getElementById('diamondsInput').value);
+        const price = getPrice(diamonds);
+        const priceInput = document.getElementById('priceInput');
+
+        if (price !== null) {
+            priceInput.value = `$${price.toFixed(2)}`;
+        } else {
+            priceInput.value = ''; // Clear if no price found
+        }
+    });
+
+    document.getElementById('closePopup').addEventListener('click', () => {
+        document.getElementById('overlay').classList.remove('active');
+        document.getElementById('popup').classList.remove('active');
+    });
+
+    document.getElementById('closeInputPopup').addEventListener('click', () => {
+        document.getElementById('inputPopup').classList.remove('active');
+    });
+
+    document.getElementById('newChecker').addEventListener('click', () => {
+        document.getElementById('userId').value = '';
+        document.getElementById('zoneId').value = '';
+        document.getElementById('newChecker').style.display = 'none';
+    });
+
+    document.getElementById('sendWhatsApp').addEventListener('click', () => {
+        const phoneNumber = '+6738371107';
+        const diamonds = document.getElementById('diamondsInput').value;
+        const price = getPrice(parseInt(diamonds));
+        const message = `User ID: ${currentUserId}\nZone ID: ${currentZoneId}\nUsername: ${currentUsername}\n💎 Diamonds: ${diamonds}\nPrice: $${price ? price.toFixed(2) : 'N/A'}`;
+        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+        document.getElementById('inputPopup').classList.remove('active'); // Close input popup
+    });
+</script>
+
+</body>
+</html>
